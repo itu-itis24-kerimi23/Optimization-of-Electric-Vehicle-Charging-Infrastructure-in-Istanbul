@@ -1,4 +1,4 @@
-# import pandas as pd
+import pandas as pd
 
 # print('=== SOKET ===')
 # df_soket = pd.read_csv('data/raw/sarj_istasyon_soket.csv')
@@ -49,8 +49,43 @@ sys.path.append('src')
 # print('Sutunlar:', df.columns.tolist())
 # print(df[['candidate_id', 'longitude', 'latitude', 'max_capacity']].head(3))
 
-from data_processing import load_demand_zones
+# from data_processing import load_demand_zones
 
-print('\n=== DEMAND ZONES TEST ===')
-df = load_demand_zones()
-print(df.columns.tolist())
+# print('\n=== DEMAND ZONES TEST ===')
+# df = load_demand_zones()
+# print(df.columns.tolist())
+
+# import sys
+# sys.path.append('src')
+# from data_processing import load_existing_stations, load_candidate_stations
+
+# print('\n=== QUALITY CHECK ===')
+# load_existing_stations()
+# load_candidate_stations()
+
+import sys
+sys.path.append('src')
+from distance_calculator import compute_distance_matrix
+
+df = compute_distance_matrix()
+
+# # D_MAX uygulanmadan önce gerçek mesafelere bak
+# print('\n=== DST/0 (Adalar) en yakın 5 nokta ===')
+# row = df.loc['DST/0']
+# print(row[row > 0].sort_values().head(5))
+
+# print('\n=== DST/1 (Arnavutkoy) en yakın 5 nokta ===')
+# row = df.loc['DST/1']
+# print(row[row > 0].sort_values().head(5))
+
+# print('\n=== Her ilçe için erişilebilir nokta sayısı ===')
+# print((df > 0).sum(axis=1).sort_values())
+
+import pandas as pd
+zones = pd.read_csv('data/processed/demand_zones.csv')
+df = pd.read_csv('data/processed/distance_matrix.csv', index_col='district_id')
+
+for dst in ['DST/14', 'DST/30', 'DST/31']:
+    name = zones[zones['district_id'] == dst]['name'].values[0]
+    accessible = (df.loc[dst] > 0).sum()
+    print(f"{name}: {accessible} nokta erişilebilir")

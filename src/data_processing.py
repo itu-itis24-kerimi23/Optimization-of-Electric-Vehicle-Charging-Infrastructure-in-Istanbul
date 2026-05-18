@@ -40,6 +40,27 @@ def load_existing_stations():
     print(f"Existing stations loaded: {len(existing)}")
     print(existing[['station_id', 'capacity']].describe())
 
+    # DATA QUALITY CHECKS
+
+    # 1. Drop NaN coordinates
+    before = len(existing)
+    existing = existing.dropna(subset=['longitude', 'latitude'])
+    print(f"  Dropped {before - len(existing)} rows with NaN coordinates")
+
+    # 2. Drop invalid coordinates (Istanbul bounds)
+    before = len(existing)
+    existing = existing[
+        (existing['longitude'] > 25) & (existing['longitude'] < 30) &
+        (existing['latitude']  > 40) & (existing['latitude']  < 42)
+    ]
+    print(f"  Dropped {before - len(existing)} rows with invalid coordinates")
+
+    # 3. Drop duplicate stations
+    before = len(existing)
+    existing = existing.drop_duplicates(subset=['station_id'])
+    print(f"  Dropped {before - len(existing)} duplicate stations")
+
+
     return existing
 
 def load_candidate_stations():
@@ -51,22 +72,57 @@ def load_candidate_stations():
     """
     from config import K_MAX_CANDIDATE
 
-    # load ISPARK data
+    # Load ISPARK data
     ispark = pd.read_csv(os.path.join(DATA_RAW_DIR, 'ispark_parking.csv'))
 
     # Select and rename relevant columns
-    candidates = ispark[['PARK_NAME','LONGITUDE','LATITUDE','CAPACITY_OF_PARK','COUNTY_NAME']].copy()
-    candidates = candidates.rename(columns={'PARK_NAME':'name','LONGITUDE':'longitude','LATITUDE':'latitude','CAPACITY_OF_PARK':'parking_capacity','COUNTY_NAME':'county'})
+    candidates = ispark[['PARK_NAME','LONGITUDE','LATITUDE',
+                          'CAPACITY_OF_PARK','COUNTY_NAME']].copy()
+    candidates = candidates.rename(columns={
+        'PARK_NAME': 'name',
+        'LONGITUDE': 'longitude',
+        'LATITUDE': 'latitude',
+        'CAPACITY_OF_PARK': 'parking_capacity',
+        'COUNTY_NAME': 'county'
+    })
 
-    # Create a candidate_id column
+    # Create candidate_id
     candidates = candidates.reset_index(drop=True)
     candidates['candidate_id'] = 'CND/' + candidates.index.astype(str)
 
-    # Drop rows with missing coordinates
-    candidates = candidates.dropna(subset=['longitude', 'latitude'])
+    # DATA QUALITY CHECKS
 
-    # Add max_capacity column
-    candidates['max_capacity'] = (candidates['parking_capacity'] / 10).clip(lower=1, upper=K_MAX_CANDIDATE).astype(int)
+    # 1. Drop rows with missing coordinates
+    before = len(candidates)
+    candidates = candidates.dropna(subset=['longitude', 'latitude'])
+    print(f"  Dropped {before - len(candidates)} rows with NaN coordinates")
+
+    # 2. Drop invalid placeholder coordinates
+    before = len(candidates)
+    candidates = candidates[
+        (candidates['longitude'] > 25) & (candidates['longitude'] < 30) &
+        (candidates['latitude']  > 40) & (candidates['latitude']  < 42)
+    ]
+    print(f"  Dropped {before - len(candidates)} rows with invalid coordinates")
+
+    # 3. Drop zero or negative parking capacity
+    before = len(candidates)
+    candidates = candidates[candidates['parking_capacity'] > 0]
+    print(f"  Dropped {before - len(candidates)} rows with invalid capacity")
+
+    # 4. Drop duplicate coordinates (same location listed twice)
+    before = len(candidates)
+    candidates = candidates.drop_duplicates(subset=['longitude', 'latitude'])
+    print(f"  Dropped {before - len(candidates)} duplicate locations")
+
+    # Reset index after all drops
+    candidates = candidates.reset_index(drop=True)
+    candidates['candidate_id'] = 'CND/' + candidates.index.astype(str)
+
+    # Calculate max_capacity from parking size
+    candidates['max_capacity'] = (
+        candidates['parking_capacity'] / 10
+    ).clip(lower=1, upper=K_MAX_CANDIDATE).astype(int)
 
     print(f"Candidate stations loaded: {len(candidates)}")
     print(candidates.head(3))

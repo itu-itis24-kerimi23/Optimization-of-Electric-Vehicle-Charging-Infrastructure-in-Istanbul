@@ -11,21 +11,24 @@ DATA_PROC_DIR  = os.path.join(BASE_DIR, "data", "processed")
 # α (access), β (unmet demand), γ (cost of investment), λ (overrun penalty)
 # These values ​​can be changed with the slider in Streamlit, these are the default values.
 
-ALPHA   = 1.0   
-BETA    = 2.0    
-GAMMA   = 1.0   
-LAMBDA  = 3.0    
+ALPHA  = 1.0
+BETA   = 20.0
+GAMMA  = 1.0
+LAMBDA = 50.0 
 
 # demand model parameters
 BASE_YEAR   = 2022     # The year Nbase is based on
 N_BASE      = 21_522  # 2022 Istanbul EV count (IBB data)
-RHO         = 0.01     # The factor for converting EV numbers to charging demand units.
-                       # (1 EV ≈ 0.01 daily charge unit; to be calibrated later)
+RHO = 0.20  # Daily public charging rate per EV
+            # Estimated from EPDK data (Sep 2024):
+            # 23,377 sockets / 146,965 EVs = 0.159 base rate
+            # Adjusted to 0.20 assuming ~1.3 average daily utilization per socket
+            # Source: EPDK Sarj Hizmeti Piyasasi Aylik Istatistikleri, Sep 2024
 THETA_DEFAULT = 1.0    # Demand scaling parameter (slider default)
 
 # optimization parameteres
 BUDGET       = 50_000_000   # Total investment budget (TL)
-D_MAX        = 10_000       # Maximum deployment distance
+D_MAX        = 20_000       # Maximum deployment distance
 BIG_M        = 1_000_000    # MILP big-M constant
 
 # cost parameters
