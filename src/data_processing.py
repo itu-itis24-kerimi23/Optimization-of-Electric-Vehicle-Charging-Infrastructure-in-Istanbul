@@ -34,20 +34,14 @@ def load_existing_stations():
     # Cap capacity at K_MAX_EXISTING
     existing['capacity'] = existing['capacity'].clip(upper=K_MAX_EXISTING)
 
-    # Add max_capacity column (for expansion limit)
+    # Add max_capacity column
     existing['max_capacity'] = K_MAX_EXISTING
 
-    print(f"Existing stations loaded: {len(existing)}")
-    print(existing[['station_id', 'capacity']].describe())
-
     # DATA QUALITY CHECKS
-
-    # 1. Drop NaN coordinates
     before = len(existing)
     existing = existing.dropna(subset=['longitude', 'latitude'])
     print(f"  Dropped {before - len(existing)} rows with NaN coordinates")
 
-    # 2. Drop invalid coordinates (Istanbul bounds)
     before = len(existing)
     existing = existing[
         (existing['longitude'] > 25) & (existing['longitude'] < 30) &
@@ -55,11 +49,13 @@ def load_existing_stations():
     ]
     print(f"  Dropped {before - len(existing)} rows with invalid coordinates")
 
-    # 3. Drop duplicate stations
     before = len(existing)
     existing = existing.drop_duplicates(subset=['station_id'])
     print(f"  Dropped {before - len(existing)} duplicate stations")
 
+    # Print stats AFTER cleaning
+    print(f"Existing stations loaded: {len(existing)}")
+    print(existing[['station_id', 'capacity']].describe())
 
     return existing
 

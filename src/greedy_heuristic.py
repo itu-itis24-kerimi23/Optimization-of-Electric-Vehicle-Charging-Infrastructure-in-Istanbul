@@ -78,19 +78,10 @@ def run_greedy(year, theta=1.0, budget=BUDGET):
 
     for _, row in scores_df.iterrows():
         cost = row['total_cost']
-
-        # YOUR CODE HERE
-        # Hint: Eğer remaining_budget >= cost ise:
-        #   - opened listesine ekle
-        #   - installed dict'ine max_capacity'yi kaydet
-        #   - remaining_budget'tan cost'u çıkar
-        # Değilse: atla (continue)
         if remaining_budget >= cost:
             opened.append(row['candidate_id'])
             installed[row['candidate_id']] = row['max_capacity']
             remaining_budget -= cost
-        else:
-            continue
 
     print(f"Greedy opened {len(opened)} candidate stations")
     print(f"Remaining budget for expansion: {remaining_budget:,.0f} TL")

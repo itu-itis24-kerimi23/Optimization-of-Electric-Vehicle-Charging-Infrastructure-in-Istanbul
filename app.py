@@ -35,7 +35,7 @@ st.title("Istanbul EV Charging Infrastructure Optimizer")
 st.markdown("Optimize the allocation of EV charging capacity across Istanbul's districts.")
 
 # sidebar
-st.sidebar.header("⚙️ Parameters")
+st.sidebar.header("Parameters")
 
 year = st.sidebar.slider(
     "Target Year",
@@ -264,7 +264,7 @@ if milp_results or greedy_results:
             st.write("No expansions.")
 
     # Opened candidates table
-    st.subheader("✖ Newly Opened Stations")
+    st.subheader("Newly Opened Stations")
     cands = pd.read_csv('data/processed/candidate_stations.csv')
 
     if method == "Both (Compare)" and milp_results and greedy_results:
@@ -326,13 +326,13 @@ if milp_results or greedy_results:
                 })
                 st.dataframe(sens_df, use_container_width=True)
                 st.caption(
-                    "Critical threshold at λ=20: "
+                    "Critical threshold at λ=10: "
                     "model starts investing above this value."
                 )
 
             with col2:
                 st.markdown("**Analysis Plot**")
-                st.image(sens_img, use_column_width=True)
+                st.image(sens_img, use_container_width=True)
 
         else:
             st.info(
