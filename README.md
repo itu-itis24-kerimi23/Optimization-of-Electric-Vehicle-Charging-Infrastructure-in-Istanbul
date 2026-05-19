@@ -71,6 +71,25 @@ python src/sensitivity_analysis.py
 streamlit run app.py
 ```
 
+### 8. Run the Jupyter Notebook
+
+```bash
+cd notebooks
+jupyter notebook main.ipynb
+```
+
+The notebook covers all project phases interactively:
+- Data preparation and processing
+- EV demand modeling with logistic growth curve
+- Distance matrix computation
+- MILP optimization with adjustable sliders
+- Greedy heuristic comparison
+- Sensitivity analysis on λ
+- Map visualization
+
+> Note: Run cells sequentially. Click "Run MILP Optimization" button
+> in Section 5 before executing map and comparison cells.
+
 ## Data Sources
 
 | Dataset | Source | Usage |
