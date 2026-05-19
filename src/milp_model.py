@@ -60,14 +60,15 @@ def run_milp(year, theta=1.0, alpha=ALPHA, beta=BETA,
     h = {j: H_CANDIDATE for j in C}   # installation cost per unit
 
     # compute normalization constant
-    # C_max: maximum possible accessibility cost
+    # C_max: each zone's demand assigned to its farthest reachable point
     C_max = 0
     for d in D:
-        for s in S:
-            dist = dist_df.loc[d, s] if s in dist_df.columns else 0
-            C_max += demand[d] * dist
+        max_dist = dist_df.loc[d].max()  # en uzak erişilebilir nokta
+        C_max += demand[d] * max_dist
     if C_max == 0:
-        C_max = 1  # prevent division by zero
+        C_max = 1
+
+    print(f"  C_max (corrected) : {C_max:,.2f}")
 
     print(f"\nModel parameters:")
     print(f"  Zones: {len(D)}, Existing: {len(E)}, Candidates: {len(C)}")
