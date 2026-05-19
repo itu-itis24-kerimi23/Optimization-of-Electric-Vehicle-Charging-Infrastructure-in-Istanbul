@@ -95,7 +95,7 @@ streamlit run app.py
 
 ## Key Findings
 
-- **MILP vs Greedy:** MILP reduces unmet demand by ~50.4% compared to the greedy heuristic
+- **MILP vs Greedy:** MILP reduces unmet demand by ~52.9% compared to the greedy heuristic
 - **Sensitivity Analysis:** Critical threshold at λ=10
 - **Strategy:** Expanding existing stations is preferred over opening new ones (~44x cost difference)
 
