@@ -13,15 +13,14 @@ from config import (YEAR_MIN, YEAR_MAX, YEAR_DEFAULT,
                     ALPHA, BETA, GAMMA, LAMBDA,
                     BUDGET, THETA_DEFAULT)
 
-# ── PAGE CONFIG ───────────────────────────────────────────────────────────────
+# page config
 st.set_page_config(
     page_title="Istanbul EV Charging Optimizer",
-    page_icon="⚡",
     layout="wide"
 )
 
-# ── SESSION STATE ─────────────────────────────────────────────────────────────
-# Sonuçları hafızada tut — slider değişse bile kaybolmasın
+# sessions state
+# Keep the results in memory — they won't get lost even if the slider changes.
 if 'milp_results' not in st.session_state:
     st.session_state.milp_results = None
 if 'greedy_results' not in st.session_state:
@@ -31,11 +30,11 @@ if 'demand_df' not in st.session_state:
 if 'total_demand' not in st.session_state:
     st.session_state.total_demand = None
 
-# ── TITLE ─────────────────────────────────────────────────────────────────────
-st.title("⚡ Istanbul EV Charging Infrastructure Optimizer")
+# title
+st.title("Istanbul EV Charging Infrastructure Optimizer")
 st.markdown("Optimize the allocation of EV charging capacity across Istanbul's districts.")
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────────
+# sidebar
 st.sidebar.header("⚙️ Parameters")
 
 year = st.sidebar.slider(
@@ -64,7 +63,7 @@ budget = st.sidebar.slider(
 ) * 1_000_000
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🎯 Objective Weights")
+st.sidebar.subheader("Objective Weights")
 
 alpha = st.sidebar.slider("α — Accessibility",    0.0, 5.0,   float(ALPHA),  0.5)
 beta  = st.sidebar.slider("β — Unmet Demand",     0.0, 30.0,  float(BETA),   0.5)
@@ -79,8 +78,8 @@ method = st.sidebar.radio(
     index=0
 )
 
-# ── DEMAND PREVIEW ────────────────────────────────────────────────────────────
-st.subheader(f"📊 Demand Forecast — {year}")
+# demand preview
+st.subheader(f"Demand Forecast — {year}")
 
 demand_df    = get_ev_demand(year, theta)
 total_demand = demand_df['demand'].sum()
@@ -100,23 +99,23 @@ st.dataframe(chart_df, use_container_width=True, height=250)
 
 st.markdown("---")
 
-# ── RUN BUTTON ────────────────────────────────────────────────────────────────
-run = st.sidebar.button("🚀 Optimize!", use_container_width=True)
+# run button
+run = st.sidebar.button("Optimize!", use_container_width=True)
 
 if run:
-    # Önceki sonuçları temizle
+    # clear previous results
     st.session_state.milp_results   = None
     st.session_state.greedy_results = None
 
     if method in ["MILP (Optimal)", "Both (Compare)"]:
-        with st.spinner("🔄 Running MILP optimization..."):
+        with st.spinner("Running MILP optimization..."):
             st.session_state.milp_results = run_milp(
                 year=year, theta=theta,
                 alpha=alpha, beta=beta,
                 gamma=gamma, lam=lam,
                 budget=budget
             )
-        st.success("✅ MILP optimization complete!")
+        st.success("MILP optimization complete!")
 
     if method in ["Greedy (Fast)", "Both (Compare)"]:
         with st.spinner("🔄 Running Greedy heuristic..."):
@@ -124,20 +123,20 @@ if run:
                 year=year, theta=theta,
                 budget=budget
             )
-        st.success("✅ Greedy optimization complete!")
+        st.success("Greedy optimization complete!")
 
-    # Demand'ı da kaydet
+    # save demand
     st.session_state.demand_df    = demand_df
     st.session_state.total_demand = total_demand
 
-# ── RESULTS ───────────────────────────────────────────────────────────────────
+# results
 milp_results   = st.session_state.milp_results
 greedy_results = st.session_state.greedy_results
 saved_demand   = st.session_state.demand_df
 
 if milp_results or greedy_results:
 
-    st.subheader("📈 Optimization Results")
+    st.subheader("Optimization Results")
 
     if method == "Both (Compare)" and milp_results and greedy_results:
         col1, col2 = st.columns(2)
@@ -164,7 +163,7 @@ if milp_results or greedy_results:
 
         gap = greedy_results['total_unmet'] - milp_results['total_unmet']
         gap_pct = gap / milp_results['total_unmet'] * 100 if milp_results['total_unmet'] > 0 else 0
-        st.info(f"💡 MILP reduces unmet demand by **{gap:.1f} units** ({gap_pct:.1f}%) vs Greedy.")
+        st.info(f"MILP reduces unmet demand by **{gap:.1f} units** ({gap_pct:.1f}%) vs Greedy.")
 
     elif milp_results:
         col1, col2, col3, col4 = st.columns(4)
@@ -188,8 +187,8 @@ if milp_results or greedy_results:
         with col4:
             st.metric("Investment", f"{greedy_results['total_investment']/1e6:.1f}M TL")
 
-    # ── MAPS ──────────────────────────────────────────────────────────────────
-    st.subheader("🗺️ Result Map")
+    # maps
+    st.subheader("Result Map")
 
     if method == "Both (Compare)" and milp_results and greedy_results:
         tab1, tab2 = st.tabs(["MILP Map", "Greedy Map"])
@@ -208,8 +207,8 @@ if milp_results or greedy_results:
         m = create_map(greedy_results, saved_demand)
         st_folium(m, width=None, height=550, returned_objects=[])
 
-    # ── UNMET DEMAND TABLE ────────────────────────────────────────────────────
-    st.subheader("📋 Unmet Demand by District")
+    # unmet demand table
+    st.subheader("Unmet Demand by District")
     zones    = pd.read_csv('data/processed/demand_zones.csv')
     unmet_df = zones[['district_id', 'name', 'demand_weight']].copy()
     unmet_df = unmet_df.merge(
@@ -227,7 +226,7 @@ if milp_results or greedy_results:
     st.dataframe(unmet_df, use_container_width=True)
 
     # Expanded stations table
-    st.subheader("🔵 Expanded Existing Stations")
+    st.subheader("Expanded Existing Stations")
 
     if method == "Both (Compare)" and milp_results and greedy_results:
         col1, col2 = st.columns(2)
@@ -299,6 +298,49 @@ if milp_results or greedy_results:
             st.dataframe(opened_df, use_container_width=True)
         else:
             st.write("No new stations.")
+    
+    # sensitivity analysis
+    if method != "Greedy (Fast)":
+        st.subheader("Sensitivity Analysis on λ")
+
+        sens_csv  = 'data/processed/sensitivity_results.csv'
+        sens_img  = 'data/processed/sensitivity_analysis.png'
+
+        if os.path.exists(sens_csv) and os.path.exists(sens_img):
+            col1, col2 = st.columns([1, 2])
+
+            with col1:
+                st.markdown("**Results Table**")
+                sens_df = pd.read_csv(sens_csv)
+                sens_df['total_investment'] = (
+                    sens_df['total_investment'] / 1e6
+                ).round(1)
+                sens_df = sens_df.rename(columns={
+                    'lambda'            : 'λ',
+                    'opened_stations'   : 'Opened',
+                    'expanded_stations' : 'Expanded',
+                    'total_unmet'       : 'Unmet',
+                    'total_investment'  : 'Invest (M TL)',
+                    'objective'         : 'Objective',
+                    'status'            : 'Status'
+                })
+                st.dataframe(sens_df, use_container_width=True)
+                st.caption(
+                    "Critical threshold at λ=20: "
+                    "model starts investing above this value."
+                )
+
+            with col2:
+                st.markdown("**Analysis Plot**")
+                st.image(sens_img, use_column_width=True)
+
+        else:
+            st.info(
+                "Sensitivity analysis not yet run. "
+                "Execute: `python src/sensitivity_analysis.py`"
+            )
+    else:
+        st.info("Sensitivity analysis is only available for MILP.")
 
 else:
-    st.info("👈 Set parameters in the sidebar and click **Optimize!** to run.")
+    st.info("Set parameters in the sidebar and click **Optimize!** to run.")
