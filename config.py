@@ -31,11 +31,13 @@ BUDGET       = 50_000_000   # Total investment budget (TL)
 D_MAX        = 20_000       # Maximum deployment distance
 BIG_M        = 1_000_000    # MILP big-M constant
 
-# cost parameters
-G_EXPANSION  = 50_000    # Cost of adding 1 unit of capacity to the existing station (TL)
-F_OPENING    = 500_000   # Fixed cost of opening a new station (TL)
-H_CANDIDATE  = 80_000    # Cost of establishing 1 unit of capacity at the new station (TL)
-
+# Cost parameters — calibrated from EPDK and market data (2024-2025)
+G_EXPANSION  = 35_000     # Cost of adding 1 AC socket to existing station (TL)
+                          # Source: Market price for AC charger installation (2024)
+F_OPENING    = 1_500_000  # Fixed cost of opening a new station (TL)
+                          # Source: EPDK license fee 2025: 1,525,330 TL
+H_CANDIDATE  = 60_000     # Cost of installing 1 socket at candidate station (TL)
+                          # Source: Average AC/DC charger installation (35,000-70,000 TL)
 # capacity constraints
 K_MAX_EXISTING   = 20   # Maximum total capacity unit at existing stations
 K_MAX_CANDIDATE  = 15   # Maximum capacity unit at candidate stations
