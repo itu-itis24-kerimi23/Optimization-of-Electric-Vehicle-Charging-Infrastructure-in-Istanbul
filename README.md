@@ -98,29 +98,33 @@ The notebook covers all project phases interactively:
 | Socket Data | IBB Open Data Portal | Current capacity (Ki) |
 | ISPARK Parking Lots | ULASAV Open Data Portal | Candidate locations (C) |
 | District Population | ULASAV Open Data Portal | Demand weights (wd) |
-| Yearly EV Count | IBB Open Data Portal | Growth curve fitting |
+| Yearly EV Count | IBB Open Data Portal | Growth curve fitting (Istanbul) |
+| Turkey EV Historical | Turkiye Today, CMS, Climate Scorecard | Turkey-wide validation series (2015-2019) |
 
 ## Model Parameters
 
 | Parameter | Value | Description |
 |---|---|---|
 | α | 1.0 | Accessibility cost weight |
-| β | 20.0 | Unmet demand penalty weight |
+| β | 50.0 | Unmet demand penalty weight |
 | γ | 1.0 | Investment cost weight |
 | λ | 50.0 | Overload penalty weight |
 | ρ | 0.20 | EV to charging demand conversion factor |
-| Budget | 50M TL | Total investment budget |
+| Budget | 150M TL | Total investment budget |
 | D_MAX | 20 km | Maximum assignment distance |
+| K bounds (Istanbul) | 0.5M - 1.5M | Logistic carrying capacity bounds (informed by Turkey projections) |
 
 ## Key Findings
 
-- **MILP vs Greedy:** MILP reduces unmet demand by ~52.9% compared to the greedy heuristic
-- **Sensitivity Analysis:** Critical threshold at λ=10
-- **Strategy:** Expanding existing stations is preferred over opening new ones (~44x cost difference)
+- **Strategy:** Expanding existing stations is preferred over opening new ones (~44x cost difference per added socket)
+- **MILP vs Greedy:** MILP finds a better budget allocation than the greedy heuristic, leaving less demand unmet for the same investment
+- **Sensitivity Analysis:** The model shows a clear phase transition in the overload penalty weight lambda, between a regime that tolerates overload and one that invests to remove it
+- **Realistic 2026 Demand:** With Turkey-informed bounds on the logistic carrying capacity, the 2026 demand projection is several times larger than an unbounded fit on only Istanbul data would produce
 
 ## Known Limitations
 
-- ρ (conversion factor) is estimated from EPDK data, not directly calibrated
+- ρ (conversion factor) is estimated from EPDK aggregate data
 - Cost parameters (G, F, H) are literature-based estimates
-- Logistic growth curve fitted on only 5 data points (2020-2024)
+- Logistic growth curve fitted on only 5 Istanbul data points (2020-2024), with K bounded based on Turkey-wide projections
 - K_MAX_EXISTING set uniformly for all stations
+- Haversine distance used instead of road-network travel time

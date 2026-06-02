@@ -11,10 +11,10 @@ def create_map(results, demand_df=None):
     Creates a Folium map visualizing optimization results.
 
     Map elements:
-    - Red circles    : existing stations (size = utilization)
-    - Blue circles   : expanded existing stations
+    - Red circles    : existing stations (size proportional to capacity)
+    - Blue circles   : expanded existing stations (size proportional to capacity)
     - Green X marks  : newly opened candidate stations
-    - Grey circles   : demand zones (size = demand weight)
+    - Grey circles   : demand zones (size proportional to demand weight)
 
     Parameters:
         results    : dict returned by run_milp() or run_greedy()
@@ -147,7 +147,7 @@ def create_map(results, demand_df=None):
         <span style="color:blue">●</span> Expanded station<br>
         <span style="color:green">✖</span> New station<br>
         <span style="color:grey">●</span> Demand zone<br>
-        <i>Circle size = utilization</i>
+        <i>Circle size = capacity</i>
     </div>
     """
     m.get_root().html.add_child(folium.Element(legend_html))

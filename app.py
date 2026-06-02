@@ -66,7 +66,7 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("Objective Weights")
 
 alpha = st.sidebar.slider("α — Accessibility",    0.0, 5.0,   float(ALPHA),  0.5)
-beta  = st.sidebar.slider("β — Unmet Demand",     0.0, 30.0,  float(BETA),   0.5)
+beta  = st.sidebar.slider("β — Unmet Demand",     0.0, 100.0, float(BETA),   1.0)
 gamma = st.sidebar.slider("γ — Investment Cost",  0.0, 5.0,   float(GAMMA),  0.5)
 lam   = st.sidebar.slider("λ — Overload Penalty", 0.0, 100.0, float(LAMBDA), 5.0)
 
@@ -118,7 +118,7 @@ if run:
         st.success("MILP optimization complete!")
 
     if method in ["Greedy (Fast)", "Both (Compare)"]:
-        with st.spinner("🔄 Running Greedy heuristic..."):
+        with st.spinner("Running Greedy heuristic..."):
             st.session_state.greedy_results = run_greedy(
                 year=year, theta=theta,
                 budget=budget
@@ -162,8 +162,8 @@ if milp_results or greedy_results:
                       f"{greedy_results['total_investment']:,.0f} TL")
 
         gap = greedy_results['total_unmet'] - milp_results['total_unmet']
-        gap_pct = gap / milp_results['total_unmet'] * 100 if milp_results['total_unmet'] > 0 else 0
-        st.info(f"MILP reduces unmet demand by **{gap:.1f} units** ({gap_pct:.1f}%) vs Greedy.")
+        gap_pct = gap / greedy_results['total_unmet'] * 100 if greedy_results['total_unmet'] > 0 else 0
+        st.info(f"MILP reduces unmet demand by **{gap:.1f} units** ({gap_pct:.1f}%) compared to Greedy.")
 
     elif milp_results:
         col1, col2, col3, col4 = st.columns(4)
